@@ -26,7 +26,9 @@ app.get('/login', function(req, res) {
 app.get('/map', function(req, res) {
   res.render('pages/map.ejs');
 });
-
+app.get('/2DMap', function(req, res) {
+  res.render('pages/2DMap.ejs');
+});
 app.get('/test', function(req, res) {
   res.render('pages/test.ejs');
 });

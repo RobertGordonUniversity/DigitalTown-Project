@@ -1,0 +1,7 @@
+body { margin:0; font-family:Arial,sans-serif; }
+header {
+  background:#1f2937; color:white; padding:10px;
+  display:flex; align-items:center; gap:10px;
+}
+h1 { margin:0; font-size:18px; }
+#map { height:calc(100vh - 60px); width:100%; }
