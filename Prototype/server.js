@@ -31,13 +31,19 @@ app.get('/register', function(req, res) {
 app.get('/map', function(req, res) {
   res.render('pages/map.ejs');
 });
-
+app.get('/2DMap', function(req, res) {
+  res.render('pages/2DMap.ejs');
+});
 app.get('/test', function(req, res) {
   res.render('pages/test.ejs');
 });
 
 
+<<<<<<< HEAD
 // connectDB();
+=======
+//connectDB();
+>>>>>>> 346eb59193ac669bc68206ed4a61fd076af0c610
 
 app.listen(8080);
 console.log('Server is listening on port 8080');
