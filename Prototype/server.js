@@ -39,11 +39,7 @@ app.get('/test', function(req, res) {
 });
 
 
-<<<<<<< HEAD
-// connectDB();
-=======
-//connectDB();
->>>>>>> 346eb59193ac669bc68206ed4a61fd076af0c610
+connectDB();
 
 app.listen(8080);
 console.log('Server is listening on port 8080');
