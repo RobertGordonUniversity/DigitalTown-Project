@@ -4,6 +4,10 @@
     "d3-request": "^1.0.6",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
-    "mongodb": "^6.20.0"
+    "mongodb": "^6.20.0",
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "vite": "^7.1.12"
   }
 }

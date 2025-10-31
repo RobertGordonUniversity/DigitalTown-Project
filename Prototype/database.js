@@ -24,10 +24,7 @@ async function connectDB() {
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
 
         db = client.db("TicketSales");
-    } catch{
-        console.error("Error connecting to MongoDB:", error);
-        throw error;
-    }
+    } catch (error) { console.log (error) }
 }
 
 function getDB(){
