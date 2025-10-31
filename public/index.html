@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>The Grey Hill — Scotland Map</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+</head>
+<body>
+  <header>
+    <h1>The Grey Hill — Scotland Map</h1>
+    <label for="filter">Filter by type:</label>
+    <select id="filter">
+      <option value="">All</option>
+      <option value="Theatre">Theatre</option>
+      <option value="Partner">Partner</option>
+      <option value="Customer">Customer</option>
+    </select>
+  </header>
+
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
