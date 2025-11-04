@@ -22,6 +22,11 @@ app.get('/login', function(req, res) {
   res.render('pages/login.ejs');
 });
 
+// register page
+app.get('/register', function(req, res) {
+  res.render('pages/register.ejs');
+});
+
 // map page
 app.get('/map', function(req, res) {
   res.render('pages/map.ejs');

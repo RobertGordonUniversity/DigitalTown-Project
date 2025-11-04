@@ -15,6 +15,7 @@ const marginLeft = 40;
 let mapData;
 const mapDataJson = "../data/map/lad.json";
 mapData = await d3.json(mapDataJson);
+
 $: console.log(mapData);
 let projection;
 $: projection = d3.geoEquirectangular().fitSize([width,height], mapData);
