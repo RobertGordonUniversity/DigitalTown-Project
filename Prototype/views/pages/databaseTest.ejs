@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <%- include('./partials/head'); %>
+  <script src = "http://localhost:8080/js/databaseClientSide.js" defer></script>
 </head>
 <body class="container">
 
@@ -10,9 +11,10 @@
 </header>
 
 <main>
-  <div class="yup">
-    <h1>This is meant to be a map page</h1>
-    <p>Welcome to templating using EJS</p>
+  <div>
+    <button onclick="Populate()">Test</button>
+    <button onclick="Get()">Get</button>
+    <p id="result">Unchanged</p>
   </div>
 </main>
 

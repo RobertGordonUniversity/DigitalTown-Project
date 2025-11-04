@@ -1,8 +1,17 @@
 var express = require('express');
 var app = express();
+// var d3 = require('d3');
+
+
+//Database Connection
 const database = require('./database');
 const connectDB = database.connectDB;
-// var d3 = require('d3');
+
+
+//Database Serverside Routes
+const populateRoute = require('./routes/databasePopulator');
+const getRoute = require('./routes/getRecords');
+
 
 // set the view engine to ejs
 app.set('view engine', 'ejs');
@@ -34,12 +43,22 @@ app.get('/map', function(req, res) {
 app.get('/2DMap', function(req, res) {
   res.render('pages/2DMap.ejs');
 });
+app.get('/databaseTest', function(req, res) {
+  res.render('pages/databaseTest.ejs');
+});
 app.get('/test', function(req, res) {
   res.render('pages/test.ejs');
 });
 
 
+//Code to send the api calls to the proper serverside code
+app.use('/api/populate', populateRoute);
+app.use('/api/get', getRoute);
+
+
+//Runs the connection to the Database
 connectDB();
+
 
 app.listen(8080);
 console.log('Server is listening on port 8080');
