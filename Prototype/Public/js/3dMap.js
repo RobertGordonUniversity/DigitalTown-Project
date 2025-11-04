@@ -1,5 +1,5 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
-import * as three from "https://cdn.jsdelivr.net/npm/three-js@79.0.0/three.min.js";
+import * as three from "imports/three/src/Three.js";
 //Could be used to make interactible map
 import * as orbitControls from 'https://cdn.jsdelivr.net/npm/three@0.162.0/examples/jsm/controls/OrbitControls.js';
 // const three = threeLib();
