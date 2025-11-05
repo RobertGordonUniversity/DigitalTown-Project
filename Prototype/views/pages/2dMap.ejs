@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>The Grey Hill — Scotland Map</title>
+  <%- include('./partials/head'); %>
+
   <link rel="stylesheet" href="css/2dMapStyle.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 </head>
-<body>
+<body class="container">
   <header>
-    <h1>The Grey Hill — Scotland Map</h1>
+    <%- include('./partials/header'); %>
+
     <label for="filter">Filter by type:</label>
     <select id="filter">
       <option value="">All</option>
@@ -16,11 +17,19 @@
       <option value="Partner">Partner</option>
       <option value="Customer">Customer</option>
     </select>
-  </header>
+    <button onclick="GetCustomer()">Get</button>
 
-  <div id="map"></div>
+  </header>
+  <main>
+    <div class="jumbotron" id="map"></div>
+  </main>
+  <footer>
+  <%- include('./partials/footer'); %>
+  </footer>
+
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src = "http://localhost:8080/js/databaseClientSide.js" defer></script>
   <script src="js/map.js"></script>
 </body>
 </html>

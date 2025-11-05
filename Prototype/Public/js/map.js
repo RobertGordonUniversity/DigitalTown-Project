@@ -1,3 +1,5 @@
+
+
 const map = L.map("map").setView([56.4907, -4.2026], 6); // центр Шотландии
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -8,19 +10,28 @@ const filterSelect = document.getElementById("filter");
 
 // функция для загрузки данных с сервера
 async function loadData() {
-  const type = filterSelect.value;
-  const url = `/api/customers${type ? `?type=${type}` : ""}`;
-  const res = await fetch(url);
-  const data = await res.json();
+  // const type = filterSelect.value;
+  // const url = `/api/customers${type ? `?type=${type}` : ""}`;
+  //Get functions from an external file
+  $.getScript('js/databaseClientSide.js').done(function(script){
+    console.log("Worked");
+    //Run and wait for the function to work
+    $.when(GetCustomer()).done(function(result){
+      console.log(result)
+      // удаляем старые маркеры
+      map.eachLayer(layer => { if(layer instanceof L.Marker) map.removeLayer(layer); });
 
-  // удаляем старые маркеры
-  map.eachLayer(layer => { if(layer instanceof L.Marker) map.removeLayer(layer); });
+      // добавляем новые маркеры
+      result.forEach(loc => {
+        const marker = L.marker([loc.latitude, loc.longitude]).addTo(map);
+        marker.bindPopup(`<b>${loc.id}</b>`);
+        //<br>Type: ${loc.type}
+      });
+    })
+  }).fail(function(jqxhr,settings,exception){
+    console.log('Error with getScript');
+  })
 
-  // добавляем новые маркеры
-  data.forEach(loc => {
-    const marker = L.marker([loc.lat, loc.lng]).addTo(map);
-    marker.bindPopup(`<b>${loc.name}</b><br>Type: ${loc.type}`);
-  });
 }
 
 // загрузка данных при старте

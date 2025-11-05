@@ -38,11 +38,9 @@ app.get('/register', function(req, res) {
 
 // map page
 app.get('/map', function(req, res) {
-  res.render('pages/map.ejs');
+  res.render('pages/2dMap.ejs');
 });
-app.get('/2DMap', function(req, res) {
-  res.render('pages/2DMap.ejs');
-});
+
 app.get('/databaseTest', function(req, res) {
   res.render('pages/databaseTest.ejs');
 });
