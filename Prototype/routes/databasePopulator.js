@@ -8,11 +8,12 @@ router.get('/', async (req,res) => {
         //Connection to db and collection
         const db = database.getDB();
         const collection = db.collection("MapData");
-
+        const custType = ["Young","Old","Middle"];
         //random longitude + latitide, junk data
         const doc = {
             latitude: (Math.random() * 360) - 180,
-            longitude: (Math.random() * 360) - 180
+            longitude: (Math.random() * 360) - 180,
+            customer: custType[Math.floor((Math.random() * 100) % custType.length)]
         }
         
         //Inserts the document into the collection

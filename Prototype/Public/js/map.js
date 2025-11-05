@@ -11,12 +11,13 @@ const filterSelect = document.getElementById("filter");
 // функция для загрузки данных с сервера
 async function loadData() {
   // const type = filterSelect.value;
-  // const url = `/api/customers${type ? `?type=${type}` : ""}`;
+
   //Get functions from an external file
   $.getScript('js/databaseClientSide.js').done(function(script){
     console.log("Worked");
     //Run and wait for the function to work
     $.when(GetCustomer()).done(function(result){
+      //Main displaying code
       console.log(result)
       // удаляем старые маркеры
       map.eachLayer(layer => { if(layer instanceof L.Marker) map.removeLayer(layer); });
