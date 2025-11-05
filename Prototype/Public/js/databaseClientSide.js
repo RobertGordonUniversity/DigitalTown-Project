@@ -27,11 +27,10 @@ async function GetCustomer(){
         const res = await fetch('/api/get');
         const data = await res.json();
 
-        // document.getElementById('result').innerText = JSON.stringify(data, null, 2);
         console.log("This is happening on client")
         console.log(data);
+
         return data;
-        //return JSON.stringify(data, null, 2);
     } catch (error) {
         console.log(error);
     }
