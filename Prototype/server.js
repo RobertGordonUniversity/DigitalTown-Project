@@ -44,6 +44,7 @@ app.get('/map', function(req, res) {
 app.get('/databaseTest', function(req, res) {
   res.render('pages/databaseTest.ejs');
 });
+
 app.get('/test', function(req, res) {
   res.render('pages/test.ejs');
 });
