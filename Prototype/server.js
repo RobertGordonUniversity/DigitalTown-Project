@@ -23,7 +23,7 @@ app.use(express.static('Public'));
 
 // index page
 app.get('/', function(req, res) {
-  res.render('pages/index.ejs');
+  res.render('pages/home.ejs');
 });
 
 // login page
