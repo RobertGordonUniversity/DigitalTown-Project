@@ -13,9 +13,9 @@
     <label for="filter">Filter by type:</label>
     <select id="filter">
       <option value="">All</option>
-      <option value="Young">Theatre</option>
-      <option value="Middle">Partner</option>
-      <option value="Old">Customer</option>
+      <option value="Young">Young</option>
+      <option value="Middle">Middle Aged</option>
+      <option value="Old">Old</option>
     </select>
     <button onclick="GetCustomer()">Get</button>
 
@@ -28,7 +28,9 @@
   </footer>
 
 
+  
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet-heat.js"></script>
   <script src = "http://localhost:8080/js/databaseClientSide.js" defer></script>
   <script src="js/map.js"></script>
 </body>
