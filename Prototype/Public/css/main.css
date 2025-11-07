@@ -8,8 +8,19 @@ p {
     align-items:center;
     justify-content:Center;
 }
-.row.row-cols-2{
+.row{
     display:flex;
     align-items:center;
     justify-content:Center;
+}
+.row{
+    display:flex;
+    align-items:center;
+    justify-content:Center;
+}
+#homeBox{
+    display:flex;
+    align-items:center;
+    justify-content:Center;
+    padding-left: 25%;
 }
