@@ -41,14 +41,36 @@ async function loadData() {
       }
       console.log(searchedResult);
       // удаляем старые маркеры
-      map.eachLayer(layer => { if(layer instanceof L.Marker) map.removeLayer(layer); });
-
+      // map.eachLayer(layer => { if(layer instanceof L.Marker) map.removeLayer(layer); });
       // добавляем новые маркеры
       searchedResult.forEach(loc => {
         const marker = L.marker([loc.latitude, loc.longitude]).addTo(map);
         marker.bindPopup(`<b>${loc.id}</b>`);
         //<br>Type: ${loc.type}
       });
+      const heatPoints = [
+        [0, 0, 100],
+        [0, 0, 100],
+        [0, 0, 100],
+        [0, 0, 100],
+        [0, 0, 100],
+        [0, 0, 100],
+        [0, 0, 100],
+        [0, 0, 100],
+        [0, 0, 100],
+        [0, 0, 100],
+        [0, 0, 100],
+        [0, 0, 100],
+        [0, 0, 100],
+        [0, 0, 100],
+        [0, 0, 100],
+        [0, 0, 100],
+        [0, 0, 100],
+        [37.776, -122.42, 0.2]
+      ];
+
+      // Add heat layer
+      L.heatLayer(heatPoints, { radius: 25 }).addTo(map);
     })
   }).fail(function(jqxhr,settings,exception){
     console.log('Error with getScript');
