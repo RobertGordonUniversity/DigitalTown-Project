@@ -1,4 +1,12 @@
-const map = L.map("map").setView([56.4907, -4.2026], 6); // центр Шотландии
+const map = L.map("map", {
+    minZoom: 6,
+    maxZoom: 12,
+    maxBounds: [
+        [54.5, -7.5],
+        [60.9, -0.8] 
+    ],
+    maxBoundsViscosity: 1.0
+}).setView([56.4907, -4.2026], 6);
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution:'&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
@@ -6,80 +14,57 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 
 const filterSelect = document.getElementById("filter");
 
+function isInScotland(lat, lng) {
+    return lat >= 54.5 && lat <= 60.9 && lng >= -7.5 && lng <= -0.8;
+}
+
 function searchCustomer(values, searchTerm){
-  let valuesFound = [];
-  
-  values.forEach(search => {
-    try{
-      if(search.customer != undefined && search.customer == searchTerm){
-          valuesFound.push(search);
-      }
-    }
-    catch(error){
-      console.log(error);
-    } 
-  })
-  return valuesFound;
+  return values.filter(v => v.customer && (searchTerm === "" || v.customer === searchTerm));
 }
-// функция для загрузки данных с сервера
+
 async function loadData() {
-  const type = filterSelect.value;
-  console.log(type);
-  //Get functions from an external file
-  $.getScript('js/databaseClientSide.js').done(function(script){
-    console.log("Worked");
-    //Run and wait for the function to work
-    $.when(GetCustomer()).done(function(result){
-      //Main displaying code
-      console.log(result)
-      let searchedResult = []
-      //Searches
-      if(type != ""){
-        searchedResult = searchCustomer(result,type)
-      }else{
-        searchedResult = result;
-      }
-      console.log(searchedResult);
-      // удаляем старые маркеры
-      // map.eachLayer(layer => { if(layer instanceof L.Marker) map.removeLayer(layer); });
-      // добавляем новые маркеры
-      searchedResult.forEach(loc => {
-        const marker = L.marker([loc.latitude, loc.longitude]).addTo(map);
-        marker.bindPopup(`<b>${loc.id}</b>`);
-        //<br>Type: ${loc.type}
-      });
-      const heatPoints = [
-        [0, 0, 100],
-        [0, 0, 100],
-        [0, 0, 100],
-        [0, 0, 100],
-        [0, 0, 100],
-        [0, 0, 100],
-        [0, 0, 100],
-        [0, 0, 100],
-        [0, 0, 100],
-        [0, 0, 100],
-        [0, 0, 100],
-        [0, 0, 100],
-        [0, 0, 100],
-        [0, 0, 100],
-        [0, 0, 100],
-        [0, 0, 100],
-        [0, 0, 100],
-        [37.776, -122.42, 0.2]
-      ];
+    const type = filterSelect.value;
 
-      // Add heat layer
-      L.heatLayer(heatPoints, { radius: 25 }).addTo(map);
-    })
-  }).fail(function(jqxhr,settings,exception){
-    console.log('Error with getScript');
-  })
+    $.getScript('js/databaseClientSide.js').done(function(){
+        $.when(GetCustomer()).done(function(result){
+            let filtered = searchCustomer(result, type);
 
+            map.eachLayer(layer => {
+                if (layer instanceof L.Marker || layer instanceof L.HeatLayer) map.removeLayer(layer);
+            });
+
+            const heatPoints = [];
+
+            filtered.forEach(loc => {
+                if (isInScotland(loc.latitude, loc.longitude)) {
+                    L.marker([loc.latitude, loc.longitude])
+                     .addTo(map)
+                     .bindPopup(`<b>${loc.id}</b><br>${loc.customer}`);
+
+                    heatPoints.push([loc.latitude, loc.longitude, 2.0]);
+                }
+            });
+
+          if (heatPoints.length) {
+              L.heatLayer(heatPoints, { 
+                  radius: 25,          
+                  blur: 15,             
+                  max: 2.0,             
+                  minOpacity: 0.5,    
+                  gradient: {           
+                      0.0: 'rgba(0, 0, 255, 0)',
+                      0.2: 'rgba(0, 0, 255, 1)',
+                      0.4: 'rgba(0, 255, 0, 1)',
+                      0.6: 'rgba(255, 255, 0, 1)',
+                      0.8: 'rgba(255, 128, 0, 1)',
+                      1.0: 'rgba(255, 0, 0, 1)'
+                  }
+              }).addTo(map);
+          }
+        });
+    }).fail(() => console.log('Error loading databaseClientSide.js'));
 }
 
-// загрузка данных при старте
 loadData();
 
-// фильтр по типу
 filterSelect.addEventListener("change", loadData);
