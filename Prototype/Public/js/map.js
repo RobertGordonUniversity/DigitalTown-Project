@@ -8,19 +8,30 @@ const map = L.map("map", {
     maxBoundsViscosity: 1.0
 }).setView([56.4907, -4.2026], 6);
 
+
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution:'&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
 }).addTo(map);
 
+
+let simdLayer = null;
+
+
 const filterSelect = document.getElementById("filter");
+
+
 
 function isInScotland(lat, lng) {
     return lat >= 54.5 && lat <= 60.9 && lng >= -7.5 && lng <= -0.8;
 }
 
+
+
 function searchCustomer(values, searchTerm){
   return values.filter(v => v.customer && (searchTerm === "" || v.customer === searchTerm));
 }
+
+
 
 async function loadData() {
     const type = filterSelect.value;
@@ -65,6 +76,75 @@ async function loadData() {
     }).fail(() => console.log('Error loading databaseClientSide.js'));
 }
 
+
+async function loadSIMD(){
+     // Load both GeoJSON and SIMD JSON
+Promise.all([
+    fetch('data/map/datazones.geojson').then(res => res.json()),
+    fetch('data/map/SIMDdata.json').then(res => res.json())
+  ])
+  .then(([geoData, simdData]) => {
+    
+    const simdByDz = {};
+    simdData.forEach(item => {
+        simdByDz[item.DataZone] = item;
+    });
+
+    console.log(geoData.features[0].properties);
+    console.log(simdByDz['S01013482']); 
+
+    // Add GeoJSON to the map
+    simdLayer = L.geoJSON(geoData, {
+      style: feature => {
+        const dzCode = feature.properties.DataZone; // Or DZ_CODE
+        const decile = simdByDz[dzCode]?.Decile;
+        
+        // Color based on SIMD decile (1 = most deprived, 10 = least deprived)
+        let color = '#ffffff'; // default
+        if (decile !== undefined) {
+          const colors = ['#800026','#BD0026','#E31A1C','#FC4E2A','#FD8D3C','#FEB24C','#FED976','#FFEDA0','#FFFFCC','#F0FFF0'];
+          color = colors[decile - 1]; // decile 1 = colors[0]
+        }
+  
+        return {
+          fillColor: color,
+          weight: 1,
+          color: '#555',
+          fillOpacity: 0.7
+        };
+      },
+      onEachFeature: (feature, layer) => {
+        const dzCode = feature.properties.DataZone;
+        const simd = simdByDz[dzCode];
+        const rank = simd?.Rank ?? 'Unknown';
+        const decile = simd?.Decile ?? 'Unknown';
+        layer.bindPopup(`
+          <strong>Data Zone:</strong> ${dzCode}<br>
+          <strong>SIMD Rank:</strong> ${rank}<br>
+          <strong>SIMD Decile:</strong> ${decile}
+        `);
+      }
+    });
+  
+  })
+  .catch(err => console.error('Error loading data:', err));
+}
+
 loadData();
+loadSIMD();
+
+const toggleBtn = document.getElementById("toggleSIMD");
+let simdVisible = false;
+
+toggleBtn.addEventListener("click", () => {
+    if (simdLayer) {
+        if (simdVisible) {
+            map.removeLayer(simdLayer);
+        } else {
+            map.addLayer(simdLayer);
+        }
+        simdVisible = !simdVisible;
+    }
+});
 
 filterSelect.addEventListener("change", loadData);
