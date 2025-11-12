@@ -8,7 +8,6 @@ const map = L.map("map", {
     maxBoundsViscosity: 1.0
 }).setView([56.4907, -4.2026], 6);
 
-
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution:'&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
 }).addTo(map);
@@ -65,52 +64,52 @@ function defineBins(bin,bands,values){
 }
 
 async function loadData() {
-    const type = filterSelect.value;
+  const type = filterSelect.value;
 
-    $.getScript('js/databaseClientSide.js').done(function(){
-        $.when(GetCustomer()).done(function(result){
-            let filtered = searchCustomer(result, type);
+  $.getScript('js/databaseClientSide.js').done(function(){
+    $.when(GetCustomer()).done(function(result){
+      let filtered = searchCustomer(result, type);
 
-            map.eachLayer(layer => {
-                if (layer instanceof L.Marker || layer instanceof L.HeatLayer) map.removeLayer(layer);
-            });
+      map.eachLayer(layer => {
+        if (layer instanceof L.Marker || layer instanceof L.HeatLayer) map.removeLayer(layer);
+      });
 
-            const heatPoints = [];
+      const heatPoints = [];
 
-            filtered.forEach(loc => {
-                if (isInScotland(loc.latitude, loc.longitude)) {
-                    L.marker([loc.latitude, loc.longitude])
-                     .addTo(map)
-                     .bindPopup(`<b>${loc.id}</b><br>${loc.customer}`);
+      filtered.forEach(loc => {
+        if (isInScotland(loc.latitude, loc.longitude)) {
+          // L.marker([loc.latitude, loc.longitude])
+          //   .addTo(map)
+          //   .bindPopup(`<b>${loc.id}</b><br>${loc.customer}`);
 
-                    heatPoints.push([loc.latitude, loc.longitude, 2.0]);
-                }
-            });
+          heatPoints.push([loc.latitude, loc.longitude, 2.0]);
+        }
+      });
 
-          if (heatPoints.length) {
-              L.heatLayer(heatPoints, { 
-                  radius: 25,          
-                  blur: 15,             
-                  max: 2.0,             
-                  minOpacity: 0.5,    
-                  gradient: {           
-                      0.0: 'rgba(0, 0, 255, 0)',
-                      0.2: 'rgba(0, 0, 255, 1)',
-                      0.4: 'rgba(0, 255, 0, 1)',
-                      0.6: 'rgba(255, 255, 0, 1)',
-                      0.8: 'rgba(255, 128, 0, 1)',
-                      1.0: 'rgba(255, 0, 0, 1)'
-                  }
-              }).addTo(map);
+      if (heatPoints.length) {
+        L.heatLayer(heatPoints, { 
+          radius: 25,          
+          blur: 15,             
+          max: 2.0,             
+          minOpacity: 0.5,    
+          gradient: {           
+              0.0: 'rgba(0, 0, 255, 0)',
+              0.2: 'rgba(0, 0, 255, 1)',
+              0.4: 'rgba(0, 255, 0, 1)',
+              0.6: 'rgba(255, 255, 0, 1)',
+              0.8: 'rgba(255, 128, 0, 1)',
+              1.0: 'rgba(255, 0, 0, 1)'
           }
-        });
-    }).fail(() => console.log('Error loading databaseClientSide.js'));
+        }).addTo(map);
+      }
+    });
+  }).fail(() => console.log('Error loading databaseClientSide.js'));
 }
 
 
 async function loadSIMD(){
      // Load both GeoJSON and SIMD JSON
-Promise.all([
+  Promise.all([
     fetch('data/map/datazones.geojson').then(res => res.json()),
     fetch('data/map/SIMDdata.json').then(res => res.json())
   ])
@@ -123,11 +122,13 @@ Promise.all([
 
     console.log(geoData.features[0].properties);
     console.log(simdByDz['S01013482']); 
+
     let bands = 9;
     let bin = [] ;
-    bin = defineBins(bin,bands,simdByDz)
-    const colors = ['#800026','#BD0026','#E31A1C','#FC4E2A','#FD8D3C','#FEB24C','#FED976','#FFEDA0','#FFFFCC','#F0FFF0'];
 
+    bin = defineBins(bin,bands,simdByDz)
+
+    const colors = ['#800026','#BD0026','#E31A1C','#FC4E2A','#FD8D3C','#FEB24C','#FED976','#FFEDA0','#FFFFCC','#F0FFF0']
     // Add GeoJSON to the map
     simdLayer = L.geoJSON(geoData, {
       style: feature => {
@@ -149,7 +150,7 @@ Promise.all([
           fillColor: color,
           weight: 1,
           color: '#555',
-          fillOpacity: 0.7
+          fillOpacity: 0.3,
         };
       },
       onEachFeature: (feature, layer) => {
