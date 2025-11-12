@@ -31,7 +31,38 @@ function searchCustomer(values, searchTerm){
   return values.filter(v => v.customer && (searchTerm === "" || v.customer === searchTerm));
 }
 
+function defineBins(bin,bands,values){
 
+  let startValue = "06506";
+
+  let amount = Object.keys(values).length;
+
+  let max = values["S010"+startValue];
+  let min = values["S010"+startValue];
+
+  //Find the max and min of a search value
+  for(let i = 0; i < amount; i++){
+    let changeValue = parseInt(startValue) + i
+    if(changeValue < 10000){
+      changeValue = "0" +changeValue
+    }
+    if(max.HlthRank < values["S010"+changeValue].HlthRank){
+      max = values["S010"+changeValue]
+    }
+    if(min.HlthRank > values["S010"+changeValue].HlthRank){
+      min = values["S010"+changeValue]
+    }
+  }
+  //Set Max and Min values
+  bin[0] = min.HlthRank;
+  bin[bands] = max.HlthRank;
+  //
+  for(let i = bands-1; i > 0; i--){
+      bin[i] = Math.floor(amount * (0.1 * i));
+  }
+  console.log(bin);
+  return bin;
+}
 
 async function loadData() {
     const type = filterSelect.value;
@@ -92,18 +123,26 @@ Promise.all([
 
     console.log(geoData.features[0].properties);
     console.log(simdByDz['S01013482']); 
+    let bands = 9;
+    let bin = [] ;
+    bin = defineBins(bin,bands,simdByDz)
+    const colors = ['#800026','#BD0026','#E31A1C','#FC4E2A','#FD8D3C','#FEB24C','#FED976','#FFEDA0','#FFFFCC','#F0FFF0'];
 
     // Add GeoJSON to the map
     simdLayer = L.geoJSON(geoData, {
       style: feature => {
         const dzCode = feature.properties.DataZone; // Or DZ_CODE
-        const decile = simdByDz[dzCode]?.Decile;
-        
+        // const decile = simdByDz[dzCode]?.Decile;
+        const crime = simdByDz[dzCode]?.HlthRank;
+
         // Color based on SIMD decile (1 = most deprived, 10 = least deprived)
         let color = '#ffffff'; // default
-        if (decile !== undefined) {
-          const colors = ['#800026','#BD0026','#E31A1C','#FC4E2A','#FD8D3C','#FEB24C','#FED976','#FFEDA0','#FFFFCC','#F0FFF0'];
-          color = colors[decile - 1]; // decile 1 = colors[0]
+        if (crime !== undefined) {
+          for(let i = 0; i < bin.length - 1; i++){
+            if(crime > bin[i] && crime < bin[i+1]){
+              color = colors[i]; // decile 1 = colors[0]
+            }
+          }
         }
   
         return {
@@ -117,11 +156,11 @@ Promise.all([
         const dzCode = feature.properties.DataZone;
         const simd = simdByDz[dzCode];
         const rank = simd?.Rank ?? 'Unknown';
-        const decile = simd?.Decile ?? 'Unknown';
+        const crime = simd?.HlthRank ?? 'Unknown';
         layer.bindPopup(`
           <strong>Data Zone:</strong> ${dzCode}<br>
           <strong>SIMD Rank:</strong> ${rank}<br>
-          <strong>SIMD Decile:</strong> ${decile}
+          <strong>SIMD HlthRank:</strong> ${crime}
         `);
       }
     });
