@@ -17,9 +17,18 @@
       <option value="Middle">Middle Aged</option>
       <option value="Old">Old</option>
     </select>
-    <button onclick="GetCustomer()">Get</button>
+    <button onclick="GetCustomer()">Get Customer</button>
     <button id="toggleSIMD">Toggle SIMD Layer</button>
-
+    <select id="filterSIMD">
+      <option value="General">General Rank</option>
+      <option value="Health">Health Rank</option>
+      <option value="Education">Education Rank</option>
+      <option value="Income">Income Rank</option>
+      <option value="GeographicAccess">GCC Rank</option>
+    </select>
+    <label for="rankThreshold">Show areas with Rank less than: </label>
+    <input type="range" id="rankThreshold" min="1" max="6976" value="6976" step="1">
+    <span id="rankValue">6976</span>
   </header>
   <main>
     <div class="jumbotron" id="map" style="height: 600px;"></div>

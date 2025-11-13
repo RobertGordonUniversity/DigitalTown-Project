@@ -14,6 +14,14 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 
 
 let simdLayer = null;
+const rankFields = {
+  General: "Rank",
+  Health: "HlthRank",
+  Education: "EduRank",
+  Income: "IncRank",
+  GeographicAccess: "GAccRank"
+}
+
 
 
 const filterSelect = document.getElementById("filter");
@@ -108,7 +116,13 @@ async function loadData() {
 
 
 async function loadSIMD(){
-     // Load both GeoJSON and SIMD JSON
+    //Gets data from the slider
+  const rankSlider = document.getElementById("rankThreshold");
+  const rankValueDisplay = document.getElementById("rankValue");
+
+  const filter = document.getElementById("filterSIMD");
+
+  // Load both GeoJSON and SIMD JSON
   Promise.all([
     fetch('data/map/datazones.geojson').then(res => res.json()),
     fetch('data/map/SIMDdata.json').then(res => res.json())
@@ -126,44 +140,123 @@ async function loadSIMD(){
     let bands = 9;
     let bin = [] ;
 
+    //This uses health ranks do base the bands
     bin = defineBins(bin,bands,simdByDz)
 
     const colors = ['#800026','#BD0026','#E31A1C','#FC4E2A','#FD8D3C','#FEB24C','#FED976','#FFEDA0','#FFFFCC','#F0FFF0']
     // Add GeoJSON to the map
-    simdLayer = L.geoJSON(geoData, {
-      style: feature => {
-        const dzCode = feature.properties.DataZone; // Or DZ_CODE
-        // const decile = simdByDz[dzCode]?.Decile;
-        const crime = simdByDz[dzCode]?.HlthRank;
+    function drawSIMDLayer(threshold, type){
+      //Removes the old layer
+      if (simdLayer) {
+        map.removeLayer(simdLayer);
+      }
 
-        // Color based on SIMD decile (1 = most deprived, 10 = least deprived)
-        let color = '#ffffff'; // default
-        if (crime !== undefined) {
-          for(let i = 0; i < bin.length - 1; i++){
-            if(crime > bin[i] && crime < bin[i+1]){
-              color = colors[i]; // decile 1 = colors[0]
+      
+
+      simdLayer = L.geoJSON(geoData, {
+        //Filters to anything higher than rank
+        filter: feature => {
+          const dzCode = feature.properties.DataZone;
+          const simd = simdByDz[dzCode];
+          const field = rankFields[type];
+          const filterValue = simdByDz[dzCode]?.[field];
+          
+          return simd && filterValue <= threshold;
+        },
+        style: feature => {
+          const dzCode = feature.properties.DataZone;
+          // const decile = simdByDz[dzCode]?.Decile;
+          const field = rankFields[type];
+          const filterValue = simdByDz[dzCode]?.[field];
+          /*
+          if(type == "General"){
+            crime = simdByDz[dzCode]?.Rank;
+          }
+          if(type == "Health"){
+            crime = simdByDz[dzCode]?.HlthRank;
+          }
+          if(type == "Education"){
+            crime = simdByDz[dzCode]?.EduRank;
+          }
+          if(type == "Income"){
+            crime = simdByDz[dzCode]?.IncRank;
+          }
+          if(type == "GeographicAccess"){
+            crime = simdByDz[dzCode]?.GAccRank;
+          }
+            */
+          // Color based on SIMD decile (1 = most deprived, 10 = least deprived)
+          let color = '#ffffff'; // default
+          if (filterValue !== undefined) {
+            for(let i = 0; i < bin.length - 1; i++){
+              if(filterValue > bin[i] && filterValue < bin[i+1]){
+                color = colors[i]; // decile 1 = colors[0]
+              }
             }
           }
-        }
   
-        return {
-          fillColor: color,
-          weight: 1,
-          color: '#555',
-          fillOpacity: 0.3,
-        };
-      },
-      onEachFeature: (feature, layer) => {
-        const dzCode = feature.properties.DataZone;
-        const simd = simdByDz[dzCode];
-        const rank = simd?.Rank ?? 'Unknown';
-        const crime = simd?.HlthRank ?? 'Unknown';
-        layer.bindPopup(`
-          <strong>Data Zone:</strong> ${dzCode}<br>
-          <strong>SIMD Rank:</strong> ${rank}<br>
-          <strong>SIMD HlthRank:</strong> ${crime}
-        `);
-      }
+          return {
+            fillColor: color,
+            weight: 1,
+            color: '#555',
+            fillOpacity: 0.3,
+          };
+        },
+        onEachFeature: (feature, layer) => {
+          const dzCode = feature.properties.DataZone;
+          const simd = simdByDz[dzCode];
+          const field = rankFields[type];
+          const filterValue = simdByDz[dzCode]?.[field];
+          /*
+          let crime;
+          if(type == "General"){
+            crime = simdByDz[dzCode]?.Rank;
+          }
+          if(type == "Health"){
+            crime = simdByDz[dzCode]?.HlthRank;
+          }
+          if(type == "Education"){
+            crime = simdByDz[dzCode]?.EduRank;
+          }
+          if(type == "Income"){
+            crime = simdByDz[dzCode]?.IncRank;
+          }
+          if(type == "GeographicAccess"){
+            crime = simdByDz[dzCode]?.GAccRank;
+          }
+            */
+          layer.bindPopup(`
+            <strong>Data Zone:</strong> ${dzCode}<br>
+            <strong>SIMD ${type}:</strong> ${filterValue}
+          `);
+        }
+      }).addTo(map);
+    }
+
+    drawSIMDLayer(6976,filter.value);
+    map.removeLayer(simdLayer);
+
+    if (simdVisible) {
+      simdLayer.addTo(map);
+    }
+
+    // Update map when slider moves
+    rankSlider.addEventListener("input", e => {
+      const newThreshold = parseInt(e.target.value);
+      rankValueDisplay.textContent = newThreshold;
+      simdVisible = true;
+    });
+
+    rankSlider.addEventListener("change", e => {
+      const newThreshold = parseInt(e.target.value);
+      drawSIMDLayer(newThreshold,filter.value);
+      simdVisible = true;
+    });
+
+    filter.addEventListener("change", () => {
+      const currentThreshold = parseInt(document.getElementById("rankThreshold").value);
+      drawSIMDLayer(currentThreshold,filter.value)
+      simdVisible = true;
     });
   
   })
