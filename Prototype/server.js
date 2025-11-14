@@ -61,3 +61,8 @@ connectDB();
 
 app.listen(8080);
 console.log('Server is listening on port 8080');
+
+//If there is an error in the url, send user to the 404 page
+app.use(function(req, res, next) {
+   res.render('pages/404.ejs');
+})
