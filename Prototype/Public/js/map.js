@@ -1,6 +1,6 @@
 const map = L.map("map", {
     minZoom: 6,
-    maxZoom: 12,
+    maxZoom: 16,
     maxBounds: [
         [54.5, -7.5],
         [60.9, -0.8] 
@@ -39,7 +39,7 @@ function searchCustomer(values, searchTerm){
 }
 
 function defineBins(bin,bands,values){
-
+  
   let startValue = "06506";
 
   let amount = Object.keys(values).length;
@@ -53,16 +53,16 @@ function defineBins(bin,bands,values){
     if(changeValue < 10000){
       changeValue = "0" +changeValue
     }
-    if(max.HlthRank < values["S010"+changeValue].HlthRank){
+    if(max.Rank < values["S010"+changeValue].Rank){
       max = values["S010"+changeValue]
     }
-    if(min.HlthRank > values["S010"+changeValue].HlthRank){
+    if(min.Rank > values["S010"+changeValue].Rank){
       min = values["S010"+changeValue]
     }
   }
   //Set Max and Min values
-  bin[0] = min.HlthRank;
-  bin[bands] = max.HlthRank;
+  bin[0] = min.Rank;
+  bin[bands] = max.Rank;
   //
   for(let i = bands-1; i > 0; i--){
       bin[i] = Math.floor(amount * (0.1 * i));
@@ -116,7 +116,7 @@ async function loadData() {
 
 
 async function loadSIMD(){
-    //Gets data from the slider
+  //Gets data from the slider
   const rankSlider = document.getElementById("rankThreshold");
   const rankValueDisplay = document.getElementById("rankValue");
 
@@ -134,9 +134,6 @@ async function loadSIMD(){
         simdByDz[item.DataZone] = item;
     });
 
-    console.log(geoData.features[0].properties);
-    console.log(simdByDz['S01013482']); 
-
     let bands = 9;
     let bin = [] ;
 
@@ -151,7 +148,6 @@ async function loadSIMD(){
         map.removeLayer(simdLayer);
       }
 
-      
 
       simdLayer = L.geoJSON(geoData, {
         //Filters to anything higher than rank
@@ -168,23 +164,7 @@ async function loadSIMD(){
           // const decile = simdByDz[dzCode]?.Decile;
           const field = rankFields[type];
           const filterValue = simdByDz[dzCode]?.[field];
-          /*
-          if(type == "General"){
-            crime = simdByDz[dzCode]?.Rank;
-          }
-          if(type == "Health"){
-            crime = simdByDz[dzCode]?.HlthRank;
-          }
-          if(type == "Education"){
-            crime = simdByDz[dzCode]?.EduRank;
-          }
-          if(type == "Income"){
-            crime = simdByDz[dzCode]?.IncRank;
-          }
-          if(type == "GeographicAccess"){
-            crime = simdByDz[dzCode]?.GAccRank;
-          }
-            */
+
           // Color based on SIMD decile (1 = most deprived, 10 = least deprived)
           let color = '#ffffff'; // default
           if (filterValue !== undefined) {
@@ -207,24 +187,7 @@ async function loadSIMD(){
           const simd = simdByDz[dzCode];
           const field = rankFields[type];
           const filterValue = simdByDz[dzCode]?.[field];
-          /*
-          let crime;
-          if(type == "General"){
-            crime = simdByDz[dzCode]?.Rank;
-          }
-          if(type == "Health"){
-            crime = simdByDz[dzCode]?.HlthRank;
-          }
-          if(type == "Education"){
-            crime = simdByDz[dzCode]?.EduRank;
-          }
-          if(type == "Income"){
-            crime = simdByDz[dzCode]?.IncRank;
-          }
-          if(type == "GeographicAccess"){
-            crime = simdByDz[dzCode]?.GAccRank;
-          }
-            */
+
           layer.bindPopup(`
             <strong>Data Zone:</strong> ${dzCode}<br>
             <strong>SIMD ${type}:</strong> ${filterValue}

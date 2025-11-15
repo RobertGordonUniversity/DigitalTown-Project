@@ -11,6 +11,7 @@ const connectDB = database.connectDB;
 //Database Serverside Routes
 const populateRoute = require('./routes/databasePopulator');
 const getRoute = require('./routes/getRecords');
+const csvroute = require('./routes/uploadCSV');
 
 
 // set the view engine to ejs
@@ -53,6 +54,7 @@ app.get('/test', function(req, res) {
 //Code to send the api calls to the proper serverside code
 app.use('/api/populate', populateRoute);
 app.use('/api/get', getRoute);
+app.use('/api/csv', csvroute)
 
 
 //Runs the connection to the Database

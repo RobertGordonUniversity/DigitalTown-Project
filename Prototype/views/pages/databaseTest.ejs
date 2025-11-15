@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <%- include('./partials/head'); %>
-  <script src = "http://localhost:8080/js/databaseClientSide.js" defer></script>
+  
+
 </head>
 <body class="container">
 
@@ -16,11 +17,23 @@
     <button onclick="Get()">Get</button>
     <p id="result">Unchanged</p>
   </div>
+
+  <form id="CSVinfo" enctype="multipart/form-data">
+    <p>
+      <label for="CSV">Upload a CSV file</label>
+      <input type="file" id="CSV" name="CSV" />
+    </p>
+    <input type="submit" value="Submit" />
+  </form>
+
+  <div id="message"></div>
 </main>
 
 <footer>
   <%- include('./partials/footer'); %>
+  
 </footer>
 
+<script src = "js/databaseClientSide.js" defer></script>
 </body>
 </html>
