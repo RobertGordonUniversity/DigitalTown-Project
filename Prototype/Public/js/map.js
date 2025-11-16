@@ -22,7 +22,8 @@ const rankFields = {
   GeographicAccess: "GAccRank"
 }
 
-
+let heatPoints = L.layerGroup();
+let zoneLabels = L.layerGroup();
 
 const filterSelect = document.getElementById("filter");
 
@@ -79,7 +80,7 @@ async function loadData() {
       let filtered = searchCustomer(result, type);
 
       map.eachLayer(layer => {
-        if (layer instanceof L.Marker || layer instanceof L.HeatLayer) map.removeLayer(layer);
+        if (layer instanceof L.HeatLayer) map.removeLayer(layer);
       });
 
       const heatPoints = [];
@@ -89,7 +90,6 @@ async function loadData() {
           // L.marker([loc.latitude, loc.longitude])
           //   .addTo(map)
           //   .bindPopup(`<b>${loc.id}</b><br>${loc.customer}`);
-
           heatPoints.push([loc.latitude, loc.longitude, 2.0]);
         }
       });
@@ -133,6 +133,8 @@ async function loadSIMD(){
     simdData.forEach(item => {
         simdByDz[item.DataZone] = item;
     });
+    console.log(geoData);
+
 
     let bands = 9;
     let bin = [] ;
@@ -148,6 +150,9 @@ async function loadSIMD(){
         map.removeLayer(simdLayer);
       }
 
+      map.eachLayer(layer => {
+          if (layer instanceof L.Marker) map.removeLayer(layer);
+      });
 
       simdLayer = L.geoJSON(geoData, {
         //Filters to anything higher than rank
@@ -171,6 +176,7 @@ async function loadSIMD(){
             for(let i = 0; i < bin.length - 1; i++){
               if(filterValue > bin[i] && filterValue < bin[i+1]){
                 color = colors[i]; // decile 1 = colors[0]
+                valueLabel = i + 1;
               }
             }
           }
@@ -187,18 +193,26 @@ async function loadSIMD(){
           const simd = simdByDz[dzCode];
           const field = rankFields[type];
           const filterValue = simdByDz[dzCode]?.[field];
-
+          
           layer.bindPopup(`
             <strong>Data Zone:</strong> ${dzCode}<br>
             <strong>SIMD ${type}:</strong> ${filterValue}
           `);
+          let centroid = turf.center(feature)
+          let icontext = '<p>' + valueLabel +'</p>'
+          L.marker([centroid.geometry.coordinates[1],centroid.geometry.coordinates[0]],{
+            icon: L.divIcon({
+              className: 'text-labels',   // Set class for CSS styling
+              html: icontext
+            }),
+            zIndexOffset: 1000     // Make appear above other map features
+          }).addTo(map);
         }
       }).addTo(map);
     }
 
     drawSIMDLayer(6976,filter.value);
     map.removeLayer(simdLayer);
-
     if (simdVisible) {
       simdLayer.addTo(map);
     }
