@@ -12,6 +12,8 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution:'&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
 }).addTo(map);
 
+// Search marker
+let searchMarker = null;
 
 let simdLayer = null;
 const rankFields = {
@@ -27,13 +29,9 @@ let zoneLabels = L.layerGroup();
 
 const filterSelect = document.getElementById("filter");
 
-
-
 function isInScotland(lat, lng) {
     return lat >= 54.5 && lat <= 60.9 && lng >= -7.5 && lng <= -0.8;
 }
-
-
 
 function searchCustomer(values, searchTerm){
   return values.filter(v => v.customer && (searchTerm === "" || v.customer === searchTerm));
@@ -72,6 +70,99 @@ function defineBins(bin,bands,values){
   return bin;
 }
 
+// Address search function
+async function searchAddress() {
+  const searchInput = document.getElementById("addressSearch");
+  const searchButton = document.getElementById("searchButton");
+  const searchResults = document.getElementById("searchResults");
+  const query = searchInput.value.trim();
+
+  if (!query) {
+    searchResults.textContent = "Please enter a postcode or address";
+    searchResults.style.color = "red";
+    return;
+  }
+
+  searchButton.disabled = true;
+  searchResults.textContent = "Searching...";
+  searchResults.style.color = "black";
+
+  try {
+    const response = await fetch(`https://api.positionstack.com/v1/forward?access_key=9da08de773e2835da22540b8340bb74a&query=${encodeURIComponent(query)}&country=GB&limit=1`);
+    
+    if (!response.ok) {
+      throw new Error('Search failed');
+    }
+
+    const data = await response.json();
+
+    if (data.data && data.data.length > 0) {
+      const result = data.data[0];
+      const lat = result.latitude;
+      const lng = result.longitude;
+
+      // Check if location is in Scotland
+      if (isInScotland(lat, lng)) {
+        // Remove previous search marker if exists
+        if (searchMarker) {
+          map.removeLayer(searchMarker);
+        }
+
+        // Add new marker
+        searchMarker = L.marker([lat, lng], {
+          icon: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+          })
+        })
+        .addTo(map)
+        .bindPopup(`<b>${result.label || query}</b><br>Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`)
+        .openPopup();
+
+        // Pan and zoom to the location
+        map.setView([lat, lng], 13);
+
+        searchResults.textContent = `Found: ${result.label || query}`;
+        searchResults.style.color = "green";
+      } else {
+        searchResults.textContent = "Location is outside Scotland";
+        searchResults.style.color = "orange";
+      }
+    } else {
+      searchResults.textContent = "No results found";
+      searchResults.style.color = "red";
+    }
+  } catch (error) {
+    console.error('Search error:', error);
+    searchResults.textContent = "Search error. Please try again.";
+    searchResults.style.color = "red";
+  } finally {
+    searchButton.disabled = false;
+  }
+}
+
+// Add event listeners for search
+document.addEventListener('DOMContentLoaded', () => {
+  const searchButton = document.getElementById("searchButton");
+  const searchInput = document.getElementById("addressSearch");
+
+  if (searchButton) {
+    searchButton.addEventListener("click", searchAddress);
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        searchAddress();
+      }
+    });
+  }
+});
+
 async function loadData() {
   const type = filterSelect.value;
 
@@ -87,9 +178,6 @@ async function loadData() {
 
       filtered.forEach(loc => {
         if (isInScotland(loc.latitude, loc.longitude)) {
-          // L.marker([loc.latitude, loc.longitude])
-          //   .addTo(map)
-          //   .bindPopup(`<b>${loc.id}</b><br>${loc.customer}`);
           heatPoints.push([loc.latitude, loc.longitude, 2.0]);
         }
       });
@@ -114,7 +202,6 @@ async function loadData() {
   }).fail(() => console.log('Error loading databaseClientSide.js'));
 }
 
-
 async function loadSIMD(){
   //Gets data from the slider
   const rankSlider = document.getElementById("rankThreshold");
@@ -135,7 +222,6 @@ async function loadSIMD(){
     });
     console.log(geoData);
 
-
     let bands = 9;
     let bin = [] ;
 
@@ -151,7 +237,7 @@ async function loadSIMD(){
       }
 
       map.eachLayer(layer => {
-          if (layer instanceof L.Marker) map.removeLayer(layer);
+          if (layer instanceof L.Marker && layer !== searchMarker) map.removeLayer(layer);
       });
 
       simdLayer = L.geoJSON(geoData, {
@@ -166,7 +252,6 @@ async function loadSIMD(){
         },
         style: feature => {
           const dzCode = feature.properties.DataZone;
-          // const decile = simdByDz[dzCode]?.Decile;
           const field = rankFields[type];
           const filterValue = simdByDz[dzCode]?.[field];
 

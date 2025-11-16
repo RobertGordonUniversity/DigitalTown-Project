@@ -5,11 +5,77 @@
 
   <link rel="stylesheet" href="css/2dMapStyle.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <style>
+    .search-container {
+      margin: 5px 0;
+      padding: 5px 10px;
+      background-color: #f5f5f5;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .search-container label {
+      font-size: 14px;
+      margin: 0;
+    }
+    
+    .search-container input[type="text"] {
+      padding: 4px 8px;
+      width: 250px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-size: 14px;
+      height: 28px;
+    }
+    
+    .search-container button {
+      padding: 4px 12px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 14px;
+      height: 28px;
+    }
+    
+    .search-container button:hover {
+      background-color: #45a049;
+    }
+    
+    .search-container button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    
+    #searchResults {
+      font-size: 13px;
+      font-weight: bold;
+      margin: 0;
+    }
+    
+    .controls-container {
+      margin-top: 5px;
+    }
+  </style>
 </head>
 <body class="container">
   <header>
     <%- include('./partials/header'); %>
-    <div>
+  </header>
+  
+  <!-- Address Search Section -->
+  <div class="search-container">
+    <label for="addressSearch">Search:</label>
+    <input type="text" id="addressSearch" placeholder="Enter postcode or address">
+    <button id="searchButton">Search</button>
+    <div id="searchResults"></div>
+  </div>
+  
+  <!-- Existing Controls -->
+  <div class="controls-container">
       <label for="filter">Filter by type:</label>
       <select id="filter">
         <option value="">All</option>
@@ -17,8 +83,9 @@
         <option value="Middle">Middle Aged</option>
         <option value="Old">Old</option>
       </select>
-      <!-- <button onclick="GetCustomer()">Get Customer</button> -->
+      
       <button id="toggleSIMD">Toggle SIMD Layer</button>
+      
       <select id="filterSIMD">
         <option value="General">General Rank</option>
         <option value="Health">Health Rank</option>
@@ -26,22 +93,25 @@
         <option value="Income">Income Rank</option>
         <option value="GeographicAccess">GCC Rank</option>
       </select>
+      
       <label for="rankThreshold">Show areas with Rank less than: </label>
       <input type="range" id="rankThreshold" min="1" max="6976" value="6976" step="1">
       <span id="rankValue">6976</span>
     </div>
   </header>
+  
   <main>
     <div class="jumbotron" id="map" style="height: 600px;"></div>
   </main>
+  
   <footer>
-  <%- include('./partials/footer'); %>
+    <%- include('./partials/footer'); %>
   </footer>
+  
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
   <script src="https://unpkg.com/@turf/turf@^7/turf.min.js"></script>
   <script src = "http://localhost:8080/js/databaseClientSide.js" defer></script>
   <script src="js/map.js"></script>
-
 </body>
 </html>
